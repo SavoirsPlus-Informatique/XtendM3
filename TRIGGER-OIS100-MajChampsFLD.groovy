@@ -29,7 +29,6 @@ public class MajChampsFLD extends ExtendM3Trigger {
    
     DBAction query = database.table("OOHEAD")
       .index("00")
-    .selection("OACONO", "OAORNO", "OAUCA0", "OAUCA1", "OAUCT1")
       .build()
       
     DBContainer container = query.getContainer()
@@ -47,7 +46,7 @@ public class MajChampsFLD extends ExtendM3Trigger {
     }
     
     if (query.read(container)) {
-      query.readAllLock(container, 2, updateCallBack)
+      query.readLock(container, updateCallBack)
     } 
   }
 }

@@ -28,6 +28,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   String STAT_WHLO_Head
   String WHLO_Head
   String FACI_Head
+  String mode
  
   public Chk_WHLO(ProgramAPI program, InteractiveAPI interactive,
     DatabaseAPI database, MICallerAPI miCaller) {
@@ -47,47 +48,51 @@ public class Chk_WHLO extends ExtendM3Trigger {
       
     company = program.getLDAZD().CONO
     societe = program.getLDAZD().DIVI
-      
-    if (FACI_Head != "null" && FACI_Head != null) {
-      if (FACI_Head.substring(0,1)=="E") {
-        ITTY = this.callMMS200MI_GetItmBasic(ITNO)
-        if (ITTY == "null" || ITTY == null) {
-          ITNO = this.callMMS025MI_GetItem(ITNO)
-          if (ITNO == "null" || ITNO == null) {
-            ITNO = interactive.display.fields.WBITNO
-            ITNO = this.callMMS025MI_GetItemLot(ITNO)
+    
+    mode = interactive.getMode()
+   
+    if (mode != "change") {
+      if (FACI_Head != "null" && FACI_Head != null) {
+        if (FACI_Head.substring(0,1)=="E") {
+          ITTY = callMMS200MI_GetItmBasic(ITNO)
+          if (ITTY == "null" || ITTY == null) {
+            ITNO = callMMS025MI_GetItem(ITNO)
+            if (ITNO == "null" || ITNO == null) {
+              ITNO = interactive.display.fields.WBITNO
+              ITNO = callMMS025MI_GetItemLot(ITNO)
+            }
+            ITTY = callMMS200MI_GetItmBasic(ITNO)
           }
-          ITTY = this.callMMS200MI_GetItmBasic(ITNO)
-        }
-        if (ITTY == "LB ") {
-          interactive.display.fields.put("OBWHLO", "E11")
-        } else { 
-          WHLO = WHLO_Head
-          STAT_WHLO_Head = this.callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-          WHLO = "E10"
-          STAT_E10 = this.callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-          WHLO = "E20"
-          STAT_E20 = this.callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-          WHLO = "E30"
-          STAT_E30 = this.callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-            
-          if ((STAT_WHLO_Head == "20") || (STAT_WHLO_Head == "50")) {
-            interactive.display.fields.put("OBWHLO", WHLO_Head)
-          } else {
-            if ((STAT_E30 == "20") || (STAT_E30 == "50")) {
-              interactive.display.fields.put("OBWHLO", "E30")
-            } else { 
-              if (WHLO_Head == "E10") {
-                if ((STAT_E20 == "20") || (STAT_E20 == "50")) {
-                  interactive.display.fields.put("OBWHLO", "E20")
-                } else { 
-                  interactive.display.fields.put("OBWHLO", "E10")
-                }
+          if (ITTY == "LB ") {
+            interactive.display.fields.put("OBWHLO", "E11")
+          } else { 
+            WHLO = WHLO_Head
+            STAT_WHLO_Head = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+            WHLO = "E10"
+            STAT_E10 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+            WHLO = "E20"
+            STAT_E20 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+            WHLO = "E30"
+            STAT_E30 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+              
+            if ((STAT_WHLO_Head == "20") || (STAT_WHLO_Head == "50")) {
+              interactive.display.fields.put("OBWHLO", WHLO_Head)
+            } else {
+              if ((STAT_E30 == "20") || (STAT_E30 == "50")) {
+                interactive.display.fields.put("OBWHLO", "E30")
               } else { 
-                if ((STAT_E10 == "20") || (STAT_E10 == "50")) {
-                  interactive.display.fields.put("OBWHLO", "E10")
+                if (WHLO_Head == "E10") {
+                  if ((STAT_E20 == "20") || (STAT_E20 == "50")) {
+                    interactive.display.fields.put("OBWHLO", "E20")
+                  } else { 
+                    interactive.display.fields.put("OBWHLO", "E10")
+                  }
                 } else { 
-                  interactive.display.fields.put("OBWHLO", "E20")
+                  if ((STAT_E10 == "20") || (STAT_E10 == "50")) {
+                    interactive.display.fields.put("OBWHLO", "E10")
+                  } else { 
+                    interactive.display.fields.put("OBWHLO", "E20")
+                  }
                 }
               }
             }
@@ -102,7 +107,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   */
   private String callMMS025MI_GetItem(String pITNO) {
     String ITNO = ""
-    def params = ["CONO" : this.company, "ALWT" : "02", "ALWQ" : "EA13", "POPN" : pITNO]
+    def params = ["CONO" : company, "ALWT" : "02", "ALWQ" : "EA13", "POPN" : pITNO]
     
     def callback = {
       Map<String, String> response ->
@@ -120,7 +125,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   */
   private String callMMS025MI_GetItemLot(String pITNO) {
     String ITNO = ""
-    def params = ["CONO" : this.company, "ALWT" : "01", "ALWQ" : "", "POPN" : pITNO]
+    def params = ["CONO" : company, "ALWT" : "01", "ALWQ" : "", "POPN" : pITNO]
     
     def callback = {
       Map<String, String> response ->
@@ -138,7 +143,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   */
   private String callMMS200MI_GetItmBasic(String pITNO) {
     String ITTY = ""
-    def params = ["CONO" : this.company, "ITNO" : pITNO]
+    def params = ["CONO" : company, "ITNO" : pITNO]
     
     def callback = {
       Map<String, String> response ->
@@ -155,7 +160,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   */
   private String callMMS200MI_GetItmWhsBasic(String pWHLO, String pITNO) {
     String STAT = ""
-    def params = ["CONO" : this.company, "WHLO" : pWHLO, "ITNO" : pITNO]
+    def params = ["CONO" : company, "WHLO" : pWHLO, "ITNO" : pITNO]
     
     def callback = {
       Map<String, String> response ->
