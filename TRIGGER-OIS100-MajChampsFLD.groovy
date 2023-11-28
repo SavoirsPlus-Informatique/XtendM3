@@ -45,8 +45,6 @@ public class MajChampsFLD extends ExtendM3Trigger {
       lockedResult.update()
     }
     
-    if (query.read(container)) {
-      query.readLock(container, updateCallBack)
-    } 
+    query.readLock(container, updateCallBack)
   }
 }
