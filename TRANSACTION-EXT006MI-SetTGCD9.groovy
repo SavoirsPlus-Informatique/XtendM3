@@ -107,11 +107,8 @@ public class SetTGCD9 extends ExtendM3Transaction {
       lockedResult.update()
     }
     
-    if (query.read(container)) {
-      query.readLock(container, updateCallBack)
-    } else {
+    if (!query.readLock(container, updateCallBack)) {
       mi.error("L'enregistrement n'existe pas.")
     }
   }
 }
-
