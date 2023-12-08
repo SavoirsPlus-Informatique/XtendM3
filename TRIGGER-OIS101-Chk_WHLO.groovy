@@ -13,6 +13,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   private final InteractiveAPI interactive
   private final DatabaseAPI database
   private final MICallerAPI miCaller
+  private final LoggerAPI logger
   
   String company
   int CONO
@@ -28,14 +29,14 @@ public class Chk_WHLO extends ExtendM3Trigger {
   String STAT_WHLO_Head
   String WHLO_Head
   String FACI_Head
-  String mode
  
   public Chk_WHLO(ProgramAPI program, InteractiveAPI interactive,
-    DatabaseAPI database, MICallerAPI miCaller) {
+    DatabaseAPI database, MICallerAPI miCaller, LoggerAPI logger) {
     this.program = program
     this.interactive = interactive
     this.database = database
     this.miCaller = miCaller    
+    this.logger = logger
   }
   
   public void main() {
@@ -48,57 +49,53 @@ public class Chk_WHLO extends ExtendM3Trigger {
       
     company = program.getLDAZD().CONO
     societe = program.getLDAZD().DIVI
-    
-    mode = interactive.getMode()
    
-    if (mode != "change") {
-      if (FACI_Head != "null" && FACI_Head != null) {
-        if (FACI_Head.substring(0,1)=="E") {
-          ITTY = callMMS200MI_GetItmBasic(ITNO)
-          if (ITTY == "null" || ITTY == null) {
-            ITNO = callMMS025MI_GetItem(ITNO)
-            if (ITNO == "null" || ITNO == null) {
-              ITNO = interactive.display.fields.WBITNO
-              ITNO = callMMS025MI_GetItemLot(ITNO)
-            }
-            ITTY = callMMS200MI_GetItmBasic(ITNO)
-          }
-          if (ITTY == "LB ") {
-            interactive.display.fields.put("OBWHLO", "E11")
-          } else { 
-            WHLO = WHLO_Head
-            STAT_WHLO_Head = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-            WHLO = "E10"
-            STAT_E10 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-            WHLO = "E20"
-            STAT_E20 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-            WHLO = "E30"
-            STAT_E30 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-              
-            if ((STAT_WHLO_Head == "20") || (STAT_WHLO_Head == "50")) {
-              interactive.display.fields.put("OBWHLO", WHLO_Head)
-            } else {
-              if ((STAT_E30 == "20") || (STAT_E30 == "50")) {
-                interactive.display.fields.put("OBWHLO", "E30")
-              } else { 
-                if (WHLO_Head == "E10") {
-                  if ((STAT_E20 == "20") || (STAT_E20 == "50")) {
-                    interactive.display.fields.put("OBWHLO", "E20")
-                  } else { 
-                    interactive.display.fields.put("OBWHLO", "E10")
-                  }
-                } else { 
-                  if ((STAT_E10 == "20") || (STAT_E10 == "50")) {
-                    interactive.display.fields.put("OBWHLO", "E10")
-                  } else { 
-                    interactive.display.fields.put("OBWHLO", "E20")
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    if (FACI_Head != "null" && FACI_Head != null) {
+    	if (FACI_Head.substring(0,1)=="E") {
+    	  ITTY = callMMS200MI_GetItmBasic(ITNO)
+    	  if (ITTY == "null" || ITTY == null) {
+      		ITNO = callMMS025MI_GetItem(ITNO)
+      		if (ITNO == "null" || ITNO == null) {
+      		  ITNO = interactive.display.fields.WBITNO
+      		  ITNO = callMMS025MI_GetItemLot(ITNO)
+      		}
+      		ITTY = callMMS200MI_GetItmBasic(ITNO)
+    	  }
+    	  if (ITTY == "LB ") {
+    		  interactive.display.fields.put("OBWHLO", "E11")
+    	  } else { 
+      		WHLO = WHLO_Head
+      		STAT_WHLO_Head = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+      		WHLO = "E10"
+      		STAT_E10 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+      		WHLO = "E20"
+      		STAT_E20 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+      		WHLO = "E30"
+      		STAT_E30 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+      		  
+      		if ((STAT_WHLO_Head == "20") || (STAT_WHLO_Head == "50")) {
+      		  interactive.display.fields.put("OBWHLO", WHLO_Head)
+      		} else {
+      		  if ((STAT_E30 == "20") || (STAT_E30 == "50")) {
+      			  interactive.display.fields.put("OBWHLO", "E30")
+      		  } else { 
+        			if (WHLO_Head == "E10") {
+        			  if ((STAT_E20 == "20") || (STAT_E20 == "50")) {
+        				interactive.display.fields.put("OBWHLO", "E20")
+        			  } else { 
+        				interactive.display.fields.put("OBWHLO", "E10")
+        			  }
+        			} else { 
+        			  if ((STAT_E10 == "20") || (STAT_E10 == "50")) {
+        				  interactive.display.fields.put("OBWHLO", "E10")
+        			  } else { 
+        				  interactive.display.fields.put("OBWHLO", "E20")
+        			  }
+        			}
+      		  }
+      		}
+    	  }
+    	}
     }
   }
   
