@@ -7,6 +7,7 @@
  * Description: 
  * Date       Changed By                     Description
  * 20231117   Ludovic Travers                Création classe Chk_WHLO sur OIS101/B
+ * 20231213   Ludovic Travers                Modification classe Chk_WHLO sur OIS101/B
  */
 public class Chk_WHLO extends ExtendM3Trigger {
   private final ProgramAPI program
@@ -16,19 +17,18 @@ public class Chk_WHLO extends ExtendM3Trigger {
   private final LoggerAPI logger
   
   String company
-  int CONO
   String societe
-  String DIVI
-  String WHLO
-  String ITNO
-  String ITTY
-  String ORNO   
-  String STAT_E10
-  String STAT_E20
-  String STAT_E30
-  String STAT_WHLO_Head
-  String WHLO_Head
-  String FACI_Head
+  String divi
+  String whlo
+  String itno
+  String itty
+  String orno   
+  String state10
+  String state20
+  String state30
+  String statwhlohead
+  String whlohead
+  String facihead
  
   public Chk_WHLO(ProgramAPI program, InteractiveAPI interactive,
     DatabaseAPI database, MICallerAPI miCaller, LoggerAPI logger) {
@@ -40,53 +40,53 @@ public class Chk_WHLO extends ExtendM3Trigger {
   }
   
   public void main() {
-    def OHEAD = program.getTableRecord("OOHEAD")
-    WHLO_Head = OHEAD.OAWHLO
-    FACI_Head = OHEAD.OAFACI
-    WHLO = interactive.display.fields.OBWHLO
-    ORNO = interactive.display.fields.OAORNO
-    ITNO = interactive.display.fields.WBITNO
+    TableRecordAPI OHEAD = program.getTableRecord("OOHEAD")
+    whlohead = OHEAD.OAWHLO
+    facihead = OHEAD.OAFACI
+    whlo = interactive.display.fields.OBWHLO
+    orno = interactive.display.fields.OAORNO
+    itno = interactive.display.fields.WBITNO
       
     company = program.getLDAZD().CONO
     societe = program.getLDAZD().DIVI
    
-    if (FACI_Head != "null" && FACI_Head != null) {
-    	if (FACI_Head.substring(0,1)=="E") {
-    	  ITTY = callMMS200MI_GetItmBasic(ITNO)
-    	  if (ITTY == "null" || ITTY == null) {
-      		ITNO = callMMS025MI_GetItem(ITNO)
-      		if (ITNO == "null" || ITNO == null) {
-      		  ITNO = interactive.display.fields.WBITNO
-      		  ITNO = callMMS025MI_GetItemLot(ITNO)
+    if (facihead != "null" && facihead != null) {
+    	if (facihead.substring(0,1)=="E") {
+    	  itty = callMMS200MIGetItmBasic(itno)
+    	  if (itty == "null" || itty == null) {
+      		itno = callMMS025MIGetItem(itno)
+      		if (itno == "null" || itno == null) {
+      		  itno = interactive.display.fields.WBITNO
+      		  itno = callMMS025MIGetItemLot(itno)
       		}
-      		ITTY = callMMS200MI_GetItmBasic(ITNO)
+      		itty = callMMS200MIGetItmBasic(itno)
     	  }
-    	  if (ITTY == "LB ") {
+    	  if (itty == "LB ") {
     		  interactive.display.fields.put("OBWHLO", "E11")
     	  } else { 
-      		WHLO = WHLO_Head
-      		STAT_WHLO_Head = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-      		WHLO = "E10"
-      		STAT_E10 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-      		WHLO = "E20"
-      		STAT_E20 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
-      		WHLO = "E30"
-      		STAT_E30 = callMMS200MI_GetItmWhsBasic(WHLO, ITNO)
+      		whlo = whlohead
+      		statwhlohead = callMMS200MIGetItmWhsBasic(whlo, itno)
+      		whlo = "E10"
+      		state10 = callMMS200MIGetItmWhsBasic(whlo, itno)
+      		whlo = "E20"
+      		state20 = callMMS200MIGetItmWhsBasic(whlo, itno)
+      		whlo = "E30"
+      		state30 = callMMS200MIGetItmWhsBasic(whlo, itno)
       		  
-      		if ((STAT_WHLO_Head == "20") || (STAT_WHLO_Head == "50")) {
-      		  interactive.display.fields.put("OBWHLO", WHLO_Head)
+      		if ((statwhlohead == "20") || (statwhlohead == "50")) {
+      		  interactive.display.fields.put("OBWHLO", whlohead)
       		} else {
-      		  if ((STAT_E30 == "20") || (STAT_E30 == "50")) {
+      		  if ((state30 == "20") || (state30 == "50")) {
       			  interactive.display.fields.put("OBWHLO", "E30")
       		  } else { 
-        			if (WHLO_Head == "E10") {
-        			  if ((STAT_E20 == "20") || (STAT_E20 == "50")) {
+        			if (whlohead == "E10") {
+        			  if ((state20 == "20") || (state20 == "50")) {
         				interactive.display.fields.put("OBWHLO", "E20")
         			  } else { 
         				interactive.display.fields.put("OBWHLO", "E10")
         			  }
         			} else { 
-        			  if ((STAT_E10 == "20") || (STAT_E10 == "50")) {
+        			  if ((state10 == "20") || (state10 == "50")) {
         				  interactive.display.fields.put("OBWHLO", "E10")
         			  } else { 
         				  interactive.display.fields.put("OBWHLO", "E20")
@@ -102,70 +102,70 @@ public class Chk_WHLO extends ExtendM3Trigger {
 	/**
   * Call MMS025MI - GetItem to retrieve ITNO related to EAN13
   */
-  private String callMMS025MI_GetItem(String pITNO) {
-    String ITNO = ""
-    def params = ["CONO" : company, "ALWT" : "02", "ALWQ" : "EA13", "POPN" : pITNO]
+  private String callMMS025MIGetItem(String pitno) {
+    String itno = ""
+    Map<String, String> params = ["CONO" : company, "ALWT" : "02", "ALWQ" : "EA13", "POPN" : pitno]
     
-    def callback = {
+    Closure<?> callback = {
       Map<String, String> response ->
       if (response.ITNO != "") {
-        ITNO = response.ITNO
+        itno = response.ITNO
       }
     }
     miCaller.call("MMS025MI", "GetItem", params, callback)
-    return ITNO
+    return itno
   }      
   
   
 	/**
   * Call MMS025MI - GetItem to retrieve ITNO related to Item LOT
   */
-  private String callMMS025MI_GetItemLot(String pITNO) {
-    String ITNO = ""
-    def params = ["CONO" : company, "ALWT" : "01", "ALWQ" : "", "POPN" : pITNO]
+  private String callMMS025MIGetItemLot(String pitno) {
+    String itno = ""
+    Map<String, String> params = ["CONO" : company, "ALWT" : "01", "ALWQ" : "", "POPN" : pitno]
     
-    def callback = {
+    Closure<?> callback = {
       Map<String, String> response ->
       if (response.ITNO != "") {
-        ITNO = response.ITNO
+        itno = response.ITNO
       }
     }
     miCaller.call("MMS025MI", "GetItem", params, callback)
-    return ITNO
+    return itno
   }      
   
   
 	/**
   * Call MMS200MI - GetItemBasic to retrieve ITTY related to Item Number
   */
-  private String callMMS200MI_GetItmBasic(String pITNO) {
-    String ITTY = ""
-    def params = ["CONO" : company, "ITNO" : pITNO]
+  private String callMMS200MIGetItmBasic(String pitno) {
+    String itty = ""
+    Map<String, String> params = ["CONO" : company, "ITNO" : pitno]
     
-    def callback = {
+    Closure<?> callback = {
       Map<String, String> response ->
       if (response.ITTY != "") {
-        ITTY = response.ITTY
+        itty = response.ITTY
       }
     }
     miCaller.call("MMS200MI", "GetItmBasic", params, callback)
-    return ITTY
+    return itty
   }      
   
   /**
   * Call MMS200MI - GetItmWhsBasic to retrieve STAT related to Item Number in WhareHouse 
   */
-  private String callMMS200MI_GetItmWhsBasic(String pWHLO, String pITNO) {
-    String STAT = ""
-    def params = ["CONO" : company, "WHLO" : pWHLO, "ITNO" : pITNO]
+  private String callMMS200MIGetItmWhsBasic(String pwhlo, String pitno) {
+    String stat = ""
+    Map<String, String> params = ["CONO" : company, "WHLO" : pwhlo, "ITNO" : pitno]
     
-    def callback = {
+    Closure<?> callback = {
       Map<String, String> response ->
       if (response.STAT != "") {
-        STAT = response.STAT
+        stat = response.STAT
       }
     }
     miCaller.call("MMS200MI", "GetItmWhsBasic", params, callback)
-    return STAT
+    return stat
   }
 }
