@@ -7,6 +7,7 @@
  * Description: 
  * Date       Changed By                     Description
  * 20231213   Ludovic Travers                Création verbe Chk_WHLO_AddOrder sur API OIS100MI-AddOrderLine
+ * 20231214   Ludovic Travers                Modification verbe Chk_WHLO_AddOrder sur API OIS100MI-AddOrderLine
  */
 public class Chk_WHLO_AddOrder extends ExtendM3Trigger {
   private final DatabaseAPI database
@@ -188,8 +189,6 @@ public class Chk_WHLO_AddOrder extends ExtendM3Trigger {
         itty = response.ITTY
       }
     }
-    logger.info("CHASLE 4 :"+itty+" - "+pitno+" - ")
-
     miCaller.call("MMS200MI", "GetItmBasic", params, callback)
     return itty
   }      
