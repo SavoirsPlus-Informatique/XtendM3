@@ -158,7 +158,7 @@ public class ChgCdvAddress extends ExtendM3Transaction {
   private Optional<DBContainer> checkOrderExist(String orno) {
     DBAction query = database.table("OOHEAD")
       .index("00")
-      .selectAllFields()
+      .selection("OAORSL", "OAORST", "OAHOCD", "OACUNO")
       .build()
     DBContainer container = query.getContainer()
     container.set("OACONO", cono)
@@ -434,7 +434,8 @@ public class ChgCdvAddress extends ExtendM3Transaction {
   private Optional<DBContainer> searchCustomerAddress(String adrt) {
     DBAction query = database.table("OCUSAD")
     .index("00")
-    .selectAllFields()
+    .selection("OPCUNM", "OPCUA1", "OPCUA2", "OPCUA3", "OPCUA4", "OPPONO", "OPTOWN", "OPECAR", "OPCSCD", "OPPHNO", "OPTFNO", "OPYREF", "OPVRNO", "OPSPLE", "OPHAFE",
+                "OPRASN", "OPEDES", "OPMODL", "OPTEDL", "OPTEL2")
     .build()
     DBContainer container = query.getContainer()
     
