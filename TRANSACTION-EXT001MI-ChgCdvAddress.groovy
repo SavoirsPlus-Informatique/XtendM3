@@ -6,6 +6,7 @@
  * Description: 
  * Date       Changed By                     Description
  * 20240129   François Leprévost             Création verbe ChgCdvAddress
+ * 20240429   François Leprévost             Correction verbe ChgCdvAddress
  */
 public class ChgCdvAddress extends ExtendM3Transaction {
   private final MIAPI mi
@@ -111,7 +112,7 @@ public class ChgCdvAddress extends ExtendM3Transaction {
     String cua3 = (mi.inData.get("CUA3") == null) ? "" : mi.inData.get("CUA3").trim()
     String pono = (mi.inData.get("PONO") == null) ? "" : mi.inData.get("PONO").trim()
     String town = (mi.inData.get("TOWN") == null) ? "" : mi.inData.get("TOWN").trim()
-    String cua4 = pono + " " + cua1
+    String cua4 = pono + " " + town
     String ecar = (mi.inData.get("ECAR") == null) ? "" : mi.inData.get("ECAR").trim()
     String phno = (mi.inData.get("PHNO") == null) ? "" : mi.inData.get("PHNO").trim()
     String tfno = (mi.inData.get("TFNO") == null) ? "" : mi.inData.get("TFNO").trim()
@@ -134,7 +135,7 @@ public class ChgCdvAddress extends ExtendM3Transaction {
     map.put("cua3", cua3)
     map.put("pono", pono)
     map.put("town", town)
-    map.put("cua4", cua4.trim())
+    map.put("cua4", cua4)
     map.put("ecar", ecar)
     map.put("phno", phno)
     map.put("tfno", tfno)
@@ -348,7 +349,7 @@ public class ChgCdvAddress extends ExtendM3Transaction {
       container.set("ODTOWN", String.valueOf(record.get("OPTOWN")))
     }
     if (!map.get("ecar").isEmpty()) {
-      container.set("ECAR", map.get("ecar"))
+      container.set("ODECAR", map.get("ecar"))
     } else if (cidmasExist) {
       container.set("ODECAR", String.valueOf(record.get("OPECAR")))
     }
