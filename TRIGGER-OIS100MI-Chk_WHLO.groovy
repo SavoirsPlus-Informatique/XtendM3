@@ -8,7 +8,8 @@
  * Date       Changed By                     Description
  * 20231117   Ludovic Travers                Création verbe Chk_WHLO sur API OIS100MI-AddOrderLine
  * 20231213   Ludovic Travers                Modification verbe Chk_WHLO sur API OIS100MI-AddOrderLine
- */
+ * 20240514   François LEPREVOST             Ajout d'une méthode pour appliquer le spécifique uniquement pour certains types de commande enregistrés dans CRS881/882
+  */
 public class Chk_WHLO extends ExtendM3Trigger {
   private final DatabaseAPI database
   private final ProgramAPI program
@@ -48,6 +49,12 @@ public class Chk_WHLO extends ExtendM3Trigger {
     List<String> listeCde = callOIS100MIGetBatchHead(orno)
     faci = listeCde[0]
     pyno = listeCde[1]
+    String ortp = listeCde[2]
+    logger.info("FRALEP ortp = " + ortp)
+    
+    if (!checkOrdertype(ortp)) {
+      return;
+    }
     
     pyno = pyno.trim()
     whlohead = callCRS610MIGetOrderInfo(pyno)
@@ -103,6 +110,25 @@ public class Chk_WHLO extends ExtendM3Trigger {
     }
   }
   
+  /**
+  * Call CRS881MI - on recherche si le type de commande est concerné par le spécifique.
+  */
+  private boolean checkOrdertype(String ortp) {
+    Map<String, String> params = ["TRQF" : "1", "MSTD" : "TYPE_CDE", "MVRS" : "1", "BMSG" : "TypeCde", "IBOB" : "O", "ELMP" : "TypesCommandesExtModifDepot", "ELMD" : "TypesCommandesExtModifDepot", "MVXD" : ortp]
+    boolean ok = false
+    
+    Closure<?> callback = {
+      Map<String, String> response ->
+      if (response.MBMD != null && response.MBMD != "") {
+        logger.info("FRALEP MBMD = " + response.MBMD)
+        ok = true
+      }
+    }
+    miCaller.call("CRS881MI", "GetTranslData", params, callback)
+    logger.info("FRALEP ok = " + ok)
+    return ok
+  }
+  
 	/**
   * Call MMS025MI - GetItem to retrieve ITNO related to EAN13
   */
@@ -144,6 +170,7 @@ public class Chk_WHLO extends ExtendM3Trigger {
   private List<String> callOIS100MIGetBatchHead(String porno) {
     String faci = ""
     String CUNO = ""
+    String ortp = ""
     Map<String, String> params = ["CONO" : company, "ORNO" : porno]
     
     Closure<?> callback = {
@@ -154,9 +181,12 @@ public class Chk_WHLO extends ExtendM3Trigger {
       if (response.PYNO != "") {
         CUNO = response.PYNO
       }
+       if (response.ORTP != "") {
+        ortp = response.ORTP
+      }
     }
     miCaller.call("OIS100MI", "GetBatchHead", params, callback)
-    return [faci, CUNO]
+    return [faci, CUNO, ortp]
   }      
       
   /**

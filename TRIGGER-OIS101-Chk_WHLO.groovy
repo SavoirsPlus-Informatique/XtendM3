@@ -8,6 +8,7 @@
  * Date       Changed By                     Description
  * 20231117   Ludovic Travers                Création classe Chk_WHLO sur OIS101/B
  * 20231213   Ludovic Travers                Modification classe Chk_WHLO sur OIS101/B
+ * 20240514   François LEPREVOST             Ajout d'une méthode pour appliquer le spécifique uniquement pour certains types de commande enregistrés dans CRS881/882
  */
 public class Chk_WHLO extends ExtendM3Trigger {
   private final ProgramAPI program
@@ -46,6 +47,12 @@ public class Chk_WHLO extends ExtendM3Trigger {
     whlo = interactive.display.fields.OBWHLO
     orno = interactive.display.fields.OAORNO
     itno = interactive.display.fields.WBITNO
+    String ortp = interactive.display.fields.OAORTP
+    logger.info("FRALEP ortp = " + ortp)
+    
+    if (!checkOrdertype(ortp)) {
+      return;
+    }
       
     company = program.getLDAZD().CONO
     societe = program.getLDAZD().DIVI
@@ -97,6 +104,25 @@ public class Chk_WHLO extends ExtendM3Trigger {
     	  }
     	}
     }
+  }
+  
+  /**
+  * Call CRS881MI - on recherche si le type de commande est concerné par le spécifique.
+  */
+  private boolean checkOrdertype(String ortp) {
+    Map<String, String> params = ["TRQF" : "1", "MSTD" : "TYPE_CDE", "MVRS" : "1", "BMSG" : "TypeCde", "IBOB" : "O", "ELMP" : "TypesCommandesExtModifDepot", "ELMD" : "TypesCommandesExtModifDepot", "MVXD" : ortp]
+    boolean ok = false
+    
+    Closure<?> callback = {
+      Map<String, String> response ->
+      if (response.MBMD != null && response.MBMD != "") {
+        logger.info("FRALEP MBMD = " + response.MBMD)
+        ok = true
+      }
+    }
+    miCaller.call("CRS881MI", "GetTranslData", params, callback)
+    logger.info("FRALEP ok = " + ok)
+    return ok
   }
   
 	/**
