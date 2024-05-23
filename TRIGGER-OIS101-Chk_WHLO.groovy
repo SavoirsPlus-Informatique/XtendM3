@@ -15,7 +15,6 @@ public class Chk_WHLO extends ExtendM3Trigger {
   private final InteractiveAPI interactive
   private final DatabaseAPI database
   private final MICallerAPI miCaller
-  private final LoggerAPI logger
   
   String company
   String societe
@@ -31,13 +30,11 @@ public class Chk_WHLO extends ExtendM3Trigger {
   String whlohead
   String facihead
  
-  public Chk_WHLO(ProgramAPI program, InteractiveAPI interactive,
-    DatabaseAPI database, MICallerAPI miCaller, LoggerAPI logger) {
+  public Chk_WHLO(ProgramAPI program, InteractiveAPI interactive,  DatabaseAPI database, MICallerAPI miCaller) {
     this.program = program
     this.interactive = interactive
     this.database = database
     this.miCaller = miCaller    
-    this.logger = logger
   }
   
   public void main() {
@@ -48,7 +45,6 @@ public class Chk_WHLO extends ExtendM3Trigger {
     orno = interactive.display.fields.OAORNO
     itno = interactive.display.fields.WBITNO
     String ortp = interactive.display.fields.OAORTP
-    logger.info("FRALEP ortp = " + ortp)
     
     if (!checkOrdertype(ortp)) {
       return;
@@ -116,12 +112,10 @@ public class Chk_WHLO extends ExtendM3Trigger {
     Closure<?> callback = {
       Map<String, String> response ->
       if (response.MBMD != null && response.MBMD != "") {
-        logger.info("FRALEP MBMD = " + response.MBMD)
         ok = true
       }
     }
     miCaller.call("CRS881MI", "GetTranslData", params, callback)
-    logger.info("FRALEP ok = " + ok)
     return ok
   }
   
